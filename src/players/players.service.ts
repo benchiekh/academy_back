@@ -137,10 +137,18 @@ export class PlayersService {
 
   async update(id: string, dto: UpdatePlayerDto, user: AuthUser) {
     const player = await this.getAccessiblePlayer(id, user);
-    if (dto.parentId) await this.assertUserRole(dto.parentId, Role.Parent);
+    // Parents may only correct the name and birth date of their own child.
+    const data: UpdatePlayerDto = { ...dto };
+    if (user.role === Role.Parent) {
+      delete data.parentId;
+      delete data.category;
+      delete data.monthlyFee;
+      delete data.active;
+    }
+    if (data.parentId) await this.assertUserRole(data.parentId, Role.Parent);
 
-    const changed = changedFields(player.toObject() as unknown as Record<string, unknown>, dto as Record<string, unknown>);
-    player.set(dto);
+    const changed = changedFields(player.toObject() as unknown as Record<string, unknown>, data as Record<string, unknown>);
+    player.set(data);
     await player.save();
     if (changed.length) {
       await this.activity.log(user, {
@@ -178,16 +186,20 @@ export class PlayersService {
 
   async upsertTechnicalSheet(playerId: string, dto: UpsertTechnicalSheetDto, user: AuthUser) {
     const player = await this.getAccessiblePlayer(playerId, user);
+    // Parents may fill the sheet, but the coach's notes stay staff-only.
+    const data: UpsertTechnicalSheetDto = { ...dto };
+    if (user.role === Role.Parent) delete data.notes;
+
     const before = (await this.sheetModel.findOne({ playerId: player._id }).lean()) ?? {};
     const saved = await this.sheetModel
       .findOneAndUpdate(
         { playerId: player._id },
-        { $set: { ...dto, updatedBy: new Types.ObjectId(user.userId) } },
+        { $set: { ...data, updatedBy: new Types.ObjectId(user.userId) } },
         { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true },
       )
       .lean();
 
-    const changed = changedFields(before as Record<string, unknown>, dto as Record<string, unknown>);
+    const changed = changedFields(before as Record<string, unknown>, data as Record<string, unknown>);
     if (changed.length) {
       await this.activity.log(user, {
         action: 'sheet.update',

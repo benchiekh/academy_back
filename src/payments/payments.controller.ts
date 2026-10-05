@@ -53,9 +53,9 @@ export class PaymentsController {
     return this.paymentsService.getYear(year, user, category);
   }
 
-  /** GET /payments/stats?month=9&year=2026 */
+  /** GET /payments/stats?month=9&year=2026 — club finances: admin only. */
   @Get('stats')
-  @Roles(Role.Admin, Role.Coach)
+  @Roles(Role.Admin)
   getStats(
     @Query('month', ParseIntPipe) month: number,
     @Query('year', ParseIntPipe) year: number,

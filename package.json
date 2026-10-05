@@ -8,7 +8,8 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
-    "seed:demo": "ts-node -r tsconfig-paths/register src/seed.ts --demo --reset"
+    "seed:demo": "ts-node -r tsconfig-paths/register src/seed.ts --demo --reset" ,
+    "cleanup": "ts-node -r tsconfig-paths/register src/cleanup-production.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",

@@ -51,8 +51,9 @@ export class PlayersController {
     return this.playersService.create(dto, user);
   }
 
+  /** Parents may only correct name & birth date of their own child (restricted in the service). */
   @Patch(':id')
-  @Roles(Role.Admin, Role.Coach)
+  @Roles(Role.Admin, Role.Coach, Role.Parent)
   update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpdatePlayerDto,
@@ -74,8 +75,9 @@ export class PlayersController {
     return this.playersService.getTechnicalSheet(id, user);
   }
 
+  /** Staff and the parent of the player may fill the sheet (notes stay staff-only, see service). */
   @Put(':id/technical-sheet')
-  @Roles(Role.Admin, Role.Coach)
+  @Roles(Role.Admin, Role.Coach, Role.Parent)
   upsertTechnicalSheet(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() dto: UpsertTechnicalSheetDto,
