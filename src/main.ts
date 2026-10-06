@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import * as dns from 'dns';
 
@@ -7,6 +8,9 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Security HTTP headers (XSS, clickjacking, MIME sniffing, etc.)
+  app.use(helmet());
 
   app.setGlobalPrefix('api');
 
