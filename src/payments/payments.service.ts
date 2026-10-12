@@ -196,15 +196,20 @@ export class PaymentsService {
         trendAgg.find((t) => t._id.month === m.month && t._id.year === m.year)?.collected ?? 0,
     }));
 
+    // A future month has nothing due yet: outstanding/unpaid stay at 0
+    // (otherwise the UI shows the full expected total, looking like last month's debt).
+    const now = new Date();
+    const isFuture = year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth() + 1);
+
     return {
       month,
       year,
       activePlayers,
       expected,
       collected,
-      outstanding: Math.max(expected - collected, 0),
+      outstanding: isFuture ? 0 : Math.max(expected - collected, 0),
       paidCount,
-      unpaidCount: Math.max(activePlayers - paidCount, 0),
+      unpaidCount: isFuture ? 0 : Math.max(activePlayers - paidCount, 0),
       collectionRate: activePlayers ? Math.round((paidCount / activePlayers) * 100) : 0,
       trend,
     };

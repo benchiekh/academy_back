@@ -9,7 +9,10 @@
     "start:prod": "node dist/main",
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "seed:demo": "ts-node -r tsconfig-paths/register src/seed.ts --demo --reset",
-    "cleanup": "ts-node -r tsconfig-paths/register src/cleanup-production.ts"
+    "cleanup": "ts-node -r tsconfig-paths/register src/cleanup-production.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.15",
@@ -32,12 +35,32 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.9",
+    "@nestjs/testing": "^10.4.22",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.10.0",
     "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^7.2.1",
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.3.1",
+    "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node"
   }
 }
