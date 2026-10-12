@@ -69,7 +69,7 @@ export class AttendanceService {
         ...(category ? { category } : {}),
       })
       .select('name category')
-      .sort({ category: 1, name: 1 })
+      .sort({ name: 1 })
       .lean();
 
     const records = await this.attendanceModel

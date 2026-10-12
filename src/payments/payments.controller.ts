@@ -70,4 +70,12 @@ export class PaymentsController {
   getPlayerHistory(@Param('id', ParseObjectIdPipe) id: string, @CurrentUser() user: AuthUser) {
     return this.paymentsService.getPlayerHistory(id, user);
   }
+
+  /** GET /payments/day — totaux pour aujourd'hui (ou une date sélectionnée). */
+  @Get('day')
+  @Roles(Role.Admin, Role.Coach)
+  getDay(@CurrentUser() user: AuthUser) {
+    const d = new Date();
+    return this.paymentsService.getDay(d.getFullYear(), d.getMonth() + 1, d.getDate(), user);
+  }
 }

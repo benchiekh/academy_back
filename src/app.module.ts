@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { PaymentsModule } from './payments/payments.module';
 import { PlayersModule } from './players/players.module';
+import { SalaryModule } from './salaries/salary.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { UsersModule } from './users/users.module';
 
@@ -31,6 +32,7 @@ import { UsersModule } from './users/users.module';
     PlayersModule,
     AttendanceModule,
     PaymentsModule,
+    SalaryModule,
     ActivityModule,
     ScheduleModule,
   ],

@@ -67,7 +67,7 @@ export class PaymentsService {
         ...(category ? { category } : {}),
       })
       .select('name category monthlyFee')
-      .sort({ category: 1, name: 1 })
+      .sort({ name: 1 })
       .lean();
 
     const payments = await this.paymentModel
@@ -99,7 +99,7 @@ export class PaymentsService {
     const players = await this.playerModel
       .find({ ...this.playersService.scopeFilter(user), active: true, ...(category ? { category } : {}) })
       .select('name category monthlyFee createdAt')
-      .sort({ category: 1, name: 1 })
+      .sort({ name: 1 })
       .lean<(Player & { _id: Types.ObjectId; createdAt: Date })[]>();
     const ids = players.map((p) => p._id);
 
@@ -152,7 +152,7 @@ export class PaymentsService {
       .lean();
   }
 
-  /** Monthly financial stats + a 6-month collected trend. */
+  /** Monthly financial stats + a 6-month collected trend + daily totals. */
   async getStats(month: number, year: number, user: AuthUser) {
     const scope = this.playersService.scopeFilter(user);
 
@@ -212,6 +212,46 @@ export class PaymentsService {
       unpaidCount: isFuture ? 0 : Math.max(activePlayers - paidCount, 0),
       collectionRate: activePlayers ? Math.round((paidCount / activePlayers) * 100) : 0,
       trend,
+    };
+  }
+
+  /** Get daily payment totals for a specific date (YYYY-MM-DD). */
+  async getDay(year: number, month: number, day: number, user: AuthUser) {
+    const scope = this.playersService.scopeFilter(user);
+    const scopedIds = await this.playerModel.find(scope).distinct('_id');
+
+    const start = new Date(Date.UTC(year, month - 1, day));
+    const end = new Date(Date.UTC(year, month - 1, day + 1)); // start of the next day (excluded)
+
+    const [agg] = await this.paymentModel.aggregate<{
+      collected: number;
+      count: number;
+    }>([
+      {
+        $match: {
+          status: 'paid',
+          playerId: { $in: scopedIds },
+          paymentDate: {
+            $gte: start,
+            $lt: end,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          collected: { $sum: '$amount' },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    return {
+      year,
+      month,
+      day,
+      collected: agg?.collected ?? 0,
+      count: agg?.count ?? 0,
     };
   }
 }

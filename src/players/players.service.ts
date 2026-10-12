@@ -90,7 +90,7 @@ export class PlayersService {
     return this.playerModel
       .find(query)
       .populate('parentId', 'name email phone')
-      .sort({ category: 1, name: 1 })
+      .sort({ name: 1 })
       .lean();
   }
 
